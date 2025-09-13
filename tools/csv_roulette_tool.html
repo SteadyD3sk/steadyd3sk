@@ -1,0 +1,82 @@
+<!--
+  File: csv-roulette.html
+  Tool: CSV Roulette
+  Project: SteadyD3sk
+  Usage: Download or open in browser. Paste CSV content or upload a file, then spin the wheel to pick a random entry.
+  Notes: Self-contained, no external dependencies, offline-first.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSV Roulette – SteadyD3sk</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin:20px; background:#f9fafb; color:#2b2b2b; }
+    h1 { color:#2C3E91; font-size:1.6rem; }
+    textarea { width:100%; height:120px; margin-top:8px; padding:8px; }
+    input[type="file"] { margin-top:10px; }
+    button { background:#2C3E91; color:#fff; border:none; padding:10px 16px; margin-top:10px; cursor:pointer; border-radius:6px; }
+    button:hover { background:#1f2c6b; }
+    .result { margin-top:20px; font-size:1.2rem; font-weight:bold; color:#4A90E2; }
+    footer { margin-top:32px; padding:12px; text-align:center; font-size:14px; color:#666; border-top:1px solid #ddd; }
+    footer a { color:#2C3E91; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <h1>CSV Roulette</h1>
+  <p>Paste CSV content below or upload a CSV file. Click <strong>Spin</strong> to select a random entry.</p>
+
+  <!-- CSV input options -->
+  <textarea id="csvInput" placeholder="Paste CSV content here..."></textarea>
+  <br>
+  <input type="file" id="csvFile" accept=".csv" />
+  <br>
+  <button onclick="spinRoulette()">Spin</button>
+
+  <!-- Result area -->
+  <div class="result" id="result"></div>
+
+  <!-- Footer banner -->
+  <footer>
+    Powered by <strong>SteadyD3sk</strong> – <a href="../index.html">Visit Hub</a>
+  </footer>
+
+  <script>
+    // Helper: Parse CSV text into rows
+    function parseCSV(text) {
+      return text.trim().split(/\r?\n/).map(line => line.split(/,|;|\t/));
+    }
+
+    // Spin logic: choose a random row
+    function spinRoulette() {
+      let text = document.getElementById('csvInput').value.trim();
+      const fileInput = document.getElementById('csvFile');
+      
+      if (!text && fileInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          text = e.target.result;
+          processCSV(text);
+        };
+        reader.readAsText(fileInput.files[0]);
+      } else if (text) {
+        processCSV(text);
+      } else {
+        alert("Please paste CSV content or upload a file.");
+      }
+    }
+
+    // Process CSV and display random row
+    function processCSV(text) {
+      const rows = parseCSV(text);
+      if (rows.length === 0) {
+        document.getElementById('result').textContent = "No entries found.";
+        return;
+      }
+      const randomRow = rows[Math.floor(Math.random() * rows.length)];
+      document.getElementById('result').textContent = "Selected: " + randomRow.join(" | ");
+    }
+  </script>
+</body>
+</html>
