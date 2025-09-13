@@ -1,0 +1,78 @@
+<!--
+  File: index.html (external SVG logo reference)
+  Project: SteadyD3sk Hub (Bridge)
+  Usage: Place at repo root. Acts as launcher + download page for standalone tools.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SteadyD3sk – Offline Tools Hub</title>
+  <style>
+    :root{
+      --blue-royal:#4A90E2; /* header */
+      --blue-deep:#2C3E91;  /* buttons/headings */
+      --grey-light:#F5F7FA; /* cards */
+      --ink:#2B2B2B;        /* text */
+    }
+    body { margin:0; font:16px/1.5 system-ui, sans-serif; background:#fff; color:var(--ink); }
+    header { background:var(--blue-royal); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:flex-start; gap:16px; }
+    header h1 { margin:0; font-size:1.8rem; }
+    header p { margin:2px 0 0; font-size:0.9rem; opacity:0.9; }
+    .logo img{ height:48px; width:auto; display:block; }
+    .wrap { max-width:900px; margin:0 auto; padding:20px; }
+    h2 { margin-top:30px; color:var(--blue-deep); }
+    .tools { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+    .card { border:1px solid #e0e0e0; border-radius:12px; padding:16px; background:var(--grey-light); }
+    .card h3 { margin:0 0 10px; font-size:18px; color:var(--blue-deep); }
+    .btn { display:inline-block; padding:8px 14px; border-radius:8px; background:var(--blue-deep); color:#fff; text-decoration:none; font-weight:600; }
+    .btn.outline { background:transparent; border:1px solid var(--blue-deep); color:var(--blue-deep); }
+    footer { text-align:center; padding:20px; font-size:14px; color:#666; margin-top:40px; border-top:1px solid #eee; }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- External SVG Logo Reference -->
+    <div class="logo">
+      <img src="assets/logo.svg" alt="SteadyD3sk Logo" />
+    </div>
+    <div>
+      <h1>SteadyD3sk</h1>
+      <p>“Don’t let the stress enjoy itself.” – Simple, offline-first tools.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="about">
+      <h2>About</h2>
+      <p>SteadyD3sk is a growing collection of lightweight, offline tools. Each tool is a <strong>single HTML file</strong> you can download and use immediately, no installation required.</p>
+    </section>
+
+    <section id="tools">
+      <h2>Available Tools</h2>
+      <div class="tools">
+        <div class="card">
+          <h3>CSV Roulette</h3>
+          <p>Paste or upload a CSV and spin a roulette wheel to pick a random entry.</p>
+          <a href="tools/csv-roulette.html" class="btn">Open</a>
+          <a href="tools/csv-roulette.html" download class="btn outline">Download</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="donate">
+      <h2>Support</h2>
+      <p>All tools are free forever. Any donation (any amount) supports development and unlocks everything permanently (WinRAR style).</p>
+    </section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> SteadyD3sk • Offline-first Tools Hub
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
