@@ -1,0 +1,163 @@
+<!--
+  Tool: Text Changer (Unicode Fonts Library)
+  Author: SteadyD3sk (AI-assisted)
+  Version: v1.2.0
+  Usage: Open in browser, type text, toggle favorites, copy results
+  Changelog:
+    v1.0.0 – Initial release (basic styles + copy alert)
+    v1.1.0 – Expanded styles, inline copy feedback
+    v1.2.0 – Favorites system with local save, All/Favorites toggle, silent copy
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Changer – SteadyD3sk</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin:20px; background:#f9fafb; color:#2b2b2b; }
+    h1 { color:#2C3E91; font-size:1.6rem; margin-bottom:8px; }
+    textarea { width:100%; height:80px; padding:8px; margin:12px 0; font-size:1rem; }
+    .top-bar { display:flex; justify-content:flex-end; margin-bottom:10px; }
+    .toggle-btn { background:#2C3E91; color:#fff; border:none; padding:6px 12px; cursor:pointer; border-radius:4px; font-size:0.9rem; }
+    .toggle-btn:hover { background:#1f2c6b; }
+    .style-block { background:#fff; border:1px solid #ddd; padding:10px; margin:8px 0; border-radius:6px; display:flex; align-items:center; gap:10px; }
+    .style-label { font-weight:bold; color:#1E3A8A; min-width:120px; }
+    .output-text { flex:1; overflow-wrap:anywhere; }
+    .action-group { display:flex; align-items:center; gap:6px; }
+    .copy-btn { background:#2C3E91; color:#fff; border:none; padding:6px 10px; cursor:pointer; border-radius:4px; font-size:0.8rem; }
+    .copy-btn:hover { background:#1f2c6b; }
+    .star { width:18px; height:18px; cursor:pointer; fill:none; stroke:#2C3E91; stroke-width:2; }
+    .star.filled { fill:#2C3E91; }
+    footer { margin-top:32px; padding:12px; text-align:center; font-size:14px; color:#666; border-top:1px solid #ddd; }
+    footer a { color:#2C3E91; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <h1>Text Changer</h1>
+  <p>Type text below to see it in many cool styles. Mark favorites ⭐ and switch views.</p>
+
+  <!-- Input -->
+  <label for="inputText"><strong>Your Text:</strong></label>
+  <textarea id="inputText" placeholder="Type something..."></textarea>
+
+  <!-- Toggle Bar -->
+  <div class="top-bar">
+    <button id="toggleView" class="toggle-btn">Show Favorites</button>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+  <!-- Footer -->
+  <footer>
+    Powered by <strong>SteadyD3sk</strong> – <a href="../index.html">Visit Hub</a>
+  </footer>
+
+  <script>
+    // ===============================
+    // Unicode style maps (same as v1.1.0)
+    // ===============================
+    const styles = {
+      "Bold": (t) => mapChars(t, boldMap),
+      "Italic": (t) => mapChars(t, italicMap),
+      "Bold Italic": (t) => mapChars(t, boldItalicMap),
+      "Monospace": (t) => mapChars(t, monoMap),
+      "Small Caps": (t) => t.toLowerCase().replace(/[a-z]/g, c => smallCaps[c] || c),
+      "Tiny": (t) => t.split("").map(c => tinyMap[c] || c).join(""),
+      "Cursive": (t) => mapChars(t, cursiveMap),
+      "Fraktur": (t) => mapChars(t, frakturMap),
+      "Double Struck": (t) => mapChars(t, dsMap),
+      "Circled": (t) => mapChars(t, circleMap),
+      "Squared": (t) => mapChars(t, squareMap),
+      "Wide": (t) => t.split("").join(" "),
+      "Strikethrough": (t) => t.split("").map(c => c + "̶").join(""),
+      "Underline": (t) => t.split("").map(c => c + "̲").join(""),
+      "Upside Down": (t) => t.split("").map(c => flipMap[c] || c).reverse().join(""),
+      "Mirrored": (t) => t.split("").map(c => mirrorMap[c] || c).join(""),
+      "Bubble": (t) => mapChars(t, bubbleMap)
+    };
+
+    // ==== Character Maps ====
+    const boldMap = {a:"𝗮",b:"𝗯",c:"𝗰",d:"𝗱",e:"𝗲",f:"𝗳",g:"𝗴",h:"𝗵",i:"𝗶",j:"𝗷",k:"𝗸",l:"𝗹",m:"𝗺",n:"𝗻",o:"𝗼",p:"𝗽",q:"𝗾",r:"𝗿",s:"𝘀",t:"𝘁",u:"𝘂",v:"𝘃",w:"𝘄",x:"𝘅",y:"𝘆",z:"𝘇"};
+    const italicMap = {a:"𝘢",b:"𝘣",c:"𝘤",d:"𝘥",e:"𝘦",f:"𝘧",g:"𝘨",h:"𝘩",i:"𝘪",j:"𝘫",k:"𝘬",l:"𝘭",m:"𝘮",n:"𝘯",o:"𝘰",p:"𝘱",q:"𝘲",r:"𝘳",s:"𝘴",t:"𝘵",u:"𝘶",v:"𝘷",w:"𝘸",x:"𝘹",y:"𝘺",z:"𝘻"};
+    const boldItalicMap = {a:"𝙖",b:"𝙗",c:"𝙘",d:"𝙙",e:"𝙚",f:"𝙛",g:"𝙜",h:"𝙝",i:"𝙞",j:"𝙟",k:"𝙠",l:"𝙡",m:"𝙢",n:"𝙣",o:"𝙤",p:"𝙥",q:"𝙦",r:"𝙧",s:"𝙨",t:"𝙩",u:"𝙪",v:"𝙫",w:"𝙬",x:"𝙭",y:"𝙮",z:"𝙯"};
+    const monoMap = {a:"𝚊",b:"𝚋",c:"𝚌",d:"𝚍",e:"𝚎",f:"𝚏",g:"𝚐",h:"𝚑",i:"𝚒",j:"𝚓",k:"𝚔",l:"𝚕",m:"𝚖",n:"𝚗",o:"𝚘",p:"𝚙",q:"𝚚",r:"𝚛",s:"𝚜",t:"𝚝",u:"𝚞",v:"𝚟",w:"𝚠",x:"𝚡",y:"𝚢",z:"𝚣"};
+    const smallCaps = {a:"ᴀ",b:"ʙ",c:"ᴄ",d:"ᴅ",e:"ᴇ",f:"ꜰ",g:"ɢ",h:"ʜ",i:"ɪ",j:"ᴊ",k:"ᴋ",l:"ʟ",m:"ᴍ",n:"ɴ",o:"ᴏ",p:"ᴘ",q:"ǫ",r:"ʀ",s:"s",t:"ᴛ",u:"ᴜ",v:"ᴠ",w:"ᴡ",x:"x",y:"ʏ",z:"ᴢ"};
+    const tinyMap = {a:"ᵃ",b:"ᵇ",c:"ᶜ",d:"ᵈ",e:"ᵉ",f:"ᶠ",g:"ᵍ",h:"ʰ",i:"ᶦ",j:"ʲ",k:"ᵏ",l:"ˡ",m:"ᵐ",n:"ⁿ",o:"ᵒ",p:"ᵖ",q:"ᑫ",r:"ʳ",s:"ˢ",t:"ᵗ",u:"ᵘ",v:"ᵛ",w:"ʷ",x:"ˣ",y:"ʸ",z:"ᶻ"};
+    const cursiveMap = {a:"𝒶",b:"𝒷",c:"𝒸",d:"𝒹",e:"ℯ",f:"𝒻",g:"ℊ",h:"𝒽",i:"𝒾",j:"𝒿",k:"𝓀",l:"𝓁",m:"𝓂",n:"𝓃",o:"ℴ",p:"𝓅",q:"𝓆",r:"𝓇",s:"𝓈",t:"𝓉",u:"𝓊",v:"𝓋",w:"𝓌",x:"𝓍",y:"𝓎",z:"𝓏"};
+    const frakturMap = {a:"𝔞",b:"𝔟",c:"𝔠",d:"𝔡",e:"𝔢",f:"𝔣",g:"𝔤",h:"𝔥",i:"𝔦",j:"𝔧",k:"𝔨",l:"𝔩",m:"𝔪",n:"𝔫",o:"𝔬",p:"𝔭",q:"𝔮",r:"𝔯",s:"𝔰",t:"𝔱",u:"𝔲",v:"𝔳",w:"𝔴",x:"𝔵",y:"𝔶",z:"𝔷"};
+    const dsMap = {a:"𝕒",b:"𝕓",c:"𝕔",d:"𝕕",e:"𝕖",f:"𝕗",g:"𝕘",h:"𝕙",i:"𝕚",j:"𝕛",k:"𝕜",l:"𝕝",m:"𝕞",n:"𝕟",o:"𝕠",p:"𝕡",q:"𝕢",r:"𝕣",s:"𝕤",t:"𝕥",u:"𝕦",v:"𝕧",w:"𝕨",x:"𝕩",y:"𝕪",z:"𝕫"};
+    const circleMap = {a:"ⓐ",b:"ⓑ",c:"ⓒ",d:"ⓓ",e:"ⓔ",f:"ⓕ",g:"ⓖ",h:"ⓗ",i:"ⓘ",j:"ⓙ",k:"ⓚ",l:"ⓛ",m:"ⓜ",n:"ⓝ",o:"ⓞ",p:"ⓟ",q:"ⓠ",r:"ⓡ",s:"ⓢ",t:"ⓣ",u:"ⓤ",v:"ⓥ",w:"ⓦ",x:"ⓧ",y:"ⓨ",z:"ⓩ"};
+    const squareMap = {a:"🄰",b:"🄱",c:"🄲",d:"🄳",e:"🄴",f:"🄵",g:"🄶",h:"🄷",i:"🄸",j:"🄹",k:"🄺",l:"🄻",m:"🄼",n:"🄽",o:"🄾",p:"🄿",q:"🅀",r:"🅁",s:"🅂",t:"🅃",u:"🅄",v:"🅅",w:"🅆",x:"🅇",y:"🅈",z:"🅉"};
+    const flipMap = {a:"ɐ",b:"q",c:"ɔ",d:"p",e:"ǝ",f:"ɟ",g:"ƃ",h:"ɥ",i:"ᴉ",j:"ɾ",k:"ʞ",l:"l",m:"ɯ",n:"u",o:"o",p:"d",q:"b",r:"ɹ",s:"s",t:"ʇ",u:"n",v:"ʌ",w:"ʍ",x:"x",y:"ʎ",z:"z"};
+    const mirrorMap = {a:"ɒ",b:"d",c:"ɔ",d:"b",e:"ɘ",f:"ʇ",g:"ϱ",h:"Ɉ",i:"ı",j:"ſ",k:"ʞ",l:"|",m:"ɯ",n:"u",o:"o",p:"q",q:"p",r:"ɿ",s:"ƨ",t:"┴",u:"n",v:"ʌ",w:"ʍ",x:"x",y:"ʎ",z:"z"};
+    const bubbleMap = {a:"Ⓐ",b:"Ⓑ",c:"Ⓒ",d:"Ⓓ",e:"Ⓔ",f:"Ⓕ",g:"Ⓖ",h:"Ⓗ",i:"Ⓘ",j:"Ⓙ",k:"Ⓚ",l:"Ⓛ",m:"Ⓜ",n:"Ⓝ",o:"Ⓞ",p:"Ⓟ",q:"Ⓠ",r:"Ⓡ",s:"Ⓢ",t:"Ⓣ",u:"Ⓤ",v:"Ⓥ",w:"Ⓦ",x:"Ⓧ",y:"Ⓨ",z:"Ⓩ"};
+
+    // Helper: map characters
+    function mapChars(text, map) {
+      return text.split("").map(c => {
+        const lower = c.toLowerCase();
+        return map[lower] || c;
+      }).join("");
+    }
+
+    // ===============================
+    // Favorites system
+    // ===============================
+    let favorites = JSON.parse(localStorage.getItem("textChangerFavorites") || "[]");
+    let showFavorites = false;
+
+    const resultsDiv = document.getElementById("results");
+    const input = document.getElementById("inputText");
+    const toggleViewBtn = document.getElementById("toggleView");
+
+    function renderStyles() {
+      resultsDiv.innerHTML = "";
+      const text = input.value;
+      const entries = Object.entries(styles);
+
+      const filtered = showFavorites ? entries.filter(([name]) => favorites.includes(name)) : entries;
+
+      filtered.forEach(([name, fn]) => {
+        const styled = fn(text);
+        const div = document.createElement("div");
+        div.className = "style-block";
+        div.innerHTML = `
+          <span class="style-label">${name}:</span>
+          <span class="output-text">${styled}</span>
+          <div class="action-group">
+            <svg class="star ${favorites.includes(name) ? "filled" : ""}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              onclick="toggleFavorite('${name}')">
+              <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9"/>
+            </svg>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('${styled.replace(/'/g,"&#39;")}')">Copy</button>
+          </div>
+        `;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function toggleFavorite(name) {
+      if (favorites.includes(name)) {
+        favorites = favorites.filter(f => f !== name);
+      } else {
+        favorites.push(name);
+      }
+      localStorage.setItem("textChangerFavorites", JSON.stringify(favorites));
+      renderStyles();
+    }
+
+    toggleViewBtn.addEventListener("click", () => {
+      showFavorites = !showFavorites;
+      toggleViewBtn.textContent = showFavorites ? "Show All" : "Show Favorites";
+      renderStyles();
+    });
+
+    input.addEventListener("input", renderStyles);
+
+    // Initial render
+    renderStyles();
+  </script>
+</body>
+</html>
